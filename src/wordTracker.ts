@@ -9,6 +9,7 @@ export type WordTracker = {
 
 export type WordTrackerDay = {
     total: number,
+    goal?: number,
     files?: {
         [fileName: string]: WordTracker
     }
