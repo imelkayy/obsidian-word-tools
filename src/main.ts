@@ -76,7 +76,7 @@ export default class WordToolsPlugin extends Plugin {
 			this.settings.history[TODAY].files[filePath] = { initialCount: wordCount, currentCount: wordCount };
 			this.debouncedSave();
 		}
-			
+		this.settings.history[TODAY].goal = this.settings.dailyWordGoal;
 	}
 
 	updateStatusBarCount() {
