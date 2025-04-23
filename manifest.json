@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "elkay-word-tools",
+	"name": "Word Tools",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "Daily word count and other word-related tools.",
+	"author": "elkayy",
+	"authorUrl": "https://caseyhandley.com",
+	"fundingUrl": null,
+	"isDesktopOnly": true
 }
