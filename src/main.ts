@@ -158,6 +158,7 @@ class WordToolsSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		// Show Daily Goal
 		new Setting(containerEl)
 			.setName("Show Daily Goal")
 			.setDesc("Show the daily word goal next to the current day's count")
@@ -169,7 +170,31 @@ class WordToolsSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
+		
+		new Setting(containerEl)
+			.setName("Daily Word Goal")
+			.setDesc("Your daily word goal")
+			.addText(
+				text => text
+				.setValue(String(this.plugin.settings.dailyWordGoal))
+				.onChange(async (val) => {
+					const num = Number(val)
+					if(num >= 0) {
+						// Actual number given
+						this.plugin.settings.dailyWordGoal = num;
+						await this.plugin.saveSettings();
+					} else if(val === "") {
+						// Implicitly 0 if string is empty
+						this.plugin.settings.dailyWordGoal = 0;
+						await this.plugin.saveSettings();
+					} else {
+						// NaN given, reset to last stored value
+						text.setValue(String(this.plugin.settings.dailyWordGoal));
+					}
+				})
+			)
 
+		// Save Delay
 		new Setting(containerEl)
 			.setName("Save Delay")
 			.setDesc("The delay, in milliseconds, between a file being written to and the word count being saved.")
@@ -180,6 +205,21 @@ class WordToolsSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.saveDelay)
 				.onChange(async (val) => {
 					this.plugin.settings.saveDelay = val;
+					await this.plugin.saveSettings();
+				})
+			)
+		
+		// Display Update Delay
+		new Setting(containerEl)
+			.setName("Display Update Delay")
+			.setDesc("The delay, in milliseconds, between a file being written to and the word count visually updating.")
+			.setHeading()
+			.addSlider(
+				text => text
+				.setLimits(50, 5000, 50)
+				.setValue(this.plugin.settings.displayUpdateDelay)
+				.onChange(async (val) => {
+					this.plugin.settings.displayUpdateDelay = val;
 					await this.plugin.saveSettings();
 				})
 			)
