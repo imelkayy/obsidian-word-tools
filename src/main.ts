@@ -39,10 +39,8 @@ export default class WordToolsPlugin extends Plugin {
 		this.debouncedSave = debounce(this.handleDebouncedSave, this.settings.saveDelay, true);
 
 		// Initialize today's word count if it doesn't exist
-		if(!this.settings.history.hasOwnProperty(today())) {
-			this.settings.history[today()] = {total: 0, files: {}};
-			stripWordHistory(this.settings.history);
-		}
+		this.initDay(today());
+
 		// Update the current stored word count to today's saved value
 		this.updateCount(this.settings.history[today()].total);
 		
@@ -68,8 +66,19 @@ export default class WordToolsPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	initDay(forDay: string) {
+		// Initialize today's word count if it doesn't exist
+		if(!this.settings.history.hasOwnProperty(forDay)) {
+			this.settings.history[forDay] = {total: 0, files: {}};
+			stripWordHistory(this.settings.history);
+		}
+	}
+
 	initFileHistory(filePath: string, wordCount: number, forDay?: string) {
 		const TODAY = forDay ? forDay : today();
+
+		this.initDay(TODAY);
+
 		if(!this.settings.history[TODAY].files)
 			this.settings.history[TODAY].files = {};
 		if(!this.settings.history[TODAY].files.hasOwnProperty(filePath)) {
