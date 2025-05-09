@@ -2,7 +2,7 @@ const SPLIT_REGEX = /(?<!-)\b\w+('\w+)?\b|\b\d+(,\d+)*\b/g
 const COMMENT_REGEX = /\%\%.*\%\%/g
 const LINK_REGEX = /\[\[.*?\|(.*)\]\]/
 
-export function getWordCount(content: string): number {
+export default function getWordCount(content: string): number {
     content.replace("_", " ");
     content = replaceAliasedLinks(content);
     content = replaceComments(content);
