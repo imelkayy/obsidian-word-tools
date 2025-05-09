@@ -1,7 +1,5 @@
 import { today } from "./today"
 
-const SPLIT_REGEX = /[\s|.?,\/=()<>`~+_!@#$%^&*";:–—]+/
-
 export type WordTracker = {
 	initialCount: number,
 	currentCount: number,

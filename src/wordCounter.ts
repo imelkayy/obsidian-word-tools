@@ -1,3 +1,4 @@
+const SPLIT_REGEX = /(?<!-)\b\w+('\w+)?\b|\b\d+(,\d+)*\b/g 
 export function getWordCount(content: string): number {
     content.replace("_", " ");
     content = replaceAliasedLinks(content);
