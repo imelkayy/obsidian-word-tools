@@ -13,6 +13,12 @@ export default function getWordCount(content: string, settings: CountSettings): 
 
     return count;
 }
+
+export function getCharacterCount(content: string, settings: CountSettings): number {
+   content = parseContentBySettings(content, settings);
+   return content.length;
+}
+
 function parseContentBySettings(content: string, settings: CountSettings): string {
     if(!settings.countComments)
         content = replaceComments(content);
