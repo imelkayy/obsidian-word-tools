@@ -4,18 +4,23 @@ const SPLIT_REGEX = /(?<!-)\b\w+('\w+)?\b|\b\d+(,\d+)*\b/g
 const COMMENT_REGEX = /\%\%.*\%\%/g
 const LINK_REGEX = /\[\[.*?\|(.*)\]\]/
 
-export default function getWordCount(content: string, settings: CountSettings): number {
-    content.replace("_", " ");
+export default function getWordAndCharCounts(content: string, settings: CountSettings): { wc: number, cc: number } {
+    content = content.replace("_", " ");
     content = parseContentBySettings(content, settings);
-    
+    return {
+        wc: getWordCount(content),
+        cc: getCharacterCount(content)
+    }
+}
+
+export function getWordCount(content: string): number {
     const matching = [...content.replace(/_/g, " ").matchAll(SPLIT_REGEX)]
     const count = matching.length
 
     return count;
 }
 
-export function getCharacterCount(content: string, settings: CountSettings): number {
-   content = parseContentBySettings(content, settings);
+export function getCharacterCount(content: string): number {
    return content.length;
 }
 
