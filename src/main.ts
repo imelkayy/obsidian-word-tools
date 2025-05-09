@@ -1,5 +1,6 @@
 import { App, debounce, Debouncer, Modal, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
-import { wordCount, WordTrackerHistory, totalWordsToday, stripWordHistory } from './wordTracker';
+import { WordTrackerHistory, totalWordsToday, stripWordHistory } from './wordTracker';
+import getWordCount from './wordCounter';
 import { today } from './today';
 
 interface WordToolSettings {
@@ -105,7 +106,7 @@ export default class WordToolsPlugin extends Plugin {
 
 	onQuickPreview(file: TFile, contents: string) {
 		const PATH = file.path;
-		const COUNT = wordCount(contents);
+		const COUNT = getWordCount(contents);
 		const TODAY = today();
 
 		this.initFileHistory(PATH, COUNT, TODAY);
@@ -141,7 +142,7 @@ export default class WordToolsPlugin extends Plugin {
 			return;
 
 		if(!this.settings.history[TODAY].files.hasOwnProperty(PATH)) {
-			const DOC_COUNT = wordCount(await this.app.vault.cachedRead(file));
+			const DOC_COUNT = getWordCount(await this.app.vault.cachedRead(file));
 			this.initFileHistory(PATH, DOC_COUNT, TODAY);
 		}
 			
