@@ -28,7 +28,9 @@ const DEFAULT_SETTINGS: WordToolSettings = {
 
 export default class WordToolsPlugin extends Plugin {
 	settings: WordToolSettings;
-	statusBarItemEl: HTMLElement;
+	dailyCountBarEl: HTMLElement;
+	docCurrentWordsBarEl: HTMLElement;
+	docCurrentCharsBarEl: HTMLElement;
 	todayCount: number;
 	updateCount: Debouncer<[count: number], void>;
 	debouncedSave: Debouncer<[], void>;
@@ -36,8 +38,11 @@ export default class WordToolsPlugin extends Plugin {
 	PREFIX = "Word Tools";
 
 	async onload() {
-		// Create status bar element
-		this.statusBarItemEl = this.addStatusBarItem();
+		// Create status bar elements
+		this.docCurrentWordsBarEl = this.addStatusBarItem();
+		this.docCurrentCharsBarEl = this.addStatusBarItem();
+		this.dailyCountBarEl = this.addStatusBarItem();
+		
 
 		await this.loadSettings();
 
@@ -95,15 +100,20 @@ export default class WordToolsPlugin extends Plugin {
 		this.settings.history[TODAY].goal = this.settings.dailyWordGoal;
 	}
 
+	updateCurrentDocCounts(words: number, chars: number) {
+		this.docCurrentWordsBarEl.setText(`${words.toLocaleString()} words`)
+		this.docCurrentCharsBarEl.setText(`${chars.toLocaleString()} characters`);
+	}
+
 	updateStatusBarCount() {
 		const text = `${this.todayCount}${this.settings.showGoal ? `/${this.settings.dailyWordGoal}` : ""} words today `
-		this.statusBarItemEl.setText(text);
+		this.dailyCountBarEl.setText(text);
 	}
 
 	handleCountUpdate(count: number) {
 		this.todayCount = count;
 
-		if(this.statusBarItemEl)
+		if(this.dailyCountBarEl)
 			this.updateStatusBarCount();
 		
 		if(this.debouncedSave)
@@ -114,6 +124,8 @@ export default class WordToolsPlugin extends Plugin {
 		const PATH = file.path;
 		const COUNTS = getWordAndCharCounts(contents, this.settings.countSettings);
 		const TODAY = today();
+
+		this.updateCurrentDocCounts(COUNTS.wc, COUNTS.cc)
 
 		this.initFileHistory(PATH, COUNTS.wc, TODAY);
 		if(!this.settings.history[TODAY].files)
@@ -146,6 +158,8 @@ export default class WordToolsPlugin extends Plugin {
 		const TODAY = today();
 		const READ = await this.app.vault.cachedRead(file);
 		const DOC_COUNTS = getWordAndCharCounts(READ, this.settings.countSettings);
+
+		this.updateCurrentDocCounts(DOC_COUNTS.wc, DOC_COUNTS.cc)
 
 		if(!this.settings.history[TODAY].files)
 			return;
