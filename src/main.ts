@@ -2,6 +2,7 @@ import { App, debounce, Debouncer, Modal, Plugin, PluginSettingTab, Setting, TFi
 import { WordTrackerHistory, totalWordsToday, stripWordHistory } from './wordTracker';
 import getWordCount from './wordCounter';
 import { today } from './today';
+import { CountSettings } from './types';
 
 interface WordToolSettings {
 	[key: string]: any,
@@ -18,6 +19,10 @@ const DEFAULT_SETTINGS: WordToolSettings = {
 	displayUpdateDelay: 250,
 	saveDelay: 1000,
 	history: {},
+	countSettings: {
+		countComments: false,
+		countFullLink: false
+	}
 }
 
 export default class WordToolsPlugin extends Plugin {
@@ -106,7 +111,7 @@ export default class WordToolsPlugin extends Plugin {
 
 	onQuickPreview(file: TFile, contents: string) {
 		const PATH = file.path;
-		const COUNT = getWordCount(contents);
+		const COUNT = getWordCount(contents, this.settings.countSettings);
 		const TODAY = today();
 
 		this.initFileHistory(PATH, COUNT, TODAY);
@@ -138,14 +143,14 @@ export default class WordToolsPlugin extends Plugin {
 			return;
 		const PATH = file.path;
 		const TODAY = today();
+		const DOC_COUNT = getWordCount(READ, this.settings.countSettings);
+		this.updateCurrentDocCounts(DOC_COUNT, DOC_CHARS)
 		if(!this.settings.history[TODAY].files)
 			return;
 
 		if(!this.settings.history[TODAY].files.hasOwnProperty(PATH)) {
-			const DOC_COUNT = getWordCount(await this.app.vault.cachedRead(file));
 			this.initFileHistory(PATH, DOC_COUNT, TODAY);
 		}
-			
 	}
 
 	async handleDebouncedSave() {
@@ -230,6 +235,30 @@ class WordToolsSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.displayUpdateDelay)
 				.onChange(async (val) => {
 					this.plugin.settings.displayUpdateDelay = val;
+					await this.plugin.saveSettings();
+				})
+			)
+
+		new Setting(containerEl)
+			.setName("Count Comments")
+			.setDesc("Count text inside comments towards a document's word count.")
+			.addToggle(
+				text => text
+				.setValue(this.plugin.settings.countSettings.countComments)
+				.onChange(async (val) => {
+					this.plugin.settings.countSettings.countComments = val;
+					await this.plugin.saveSettings();
+				})
+			)
+
+		new Setting(containerEl)
+			.setName("Count Whole Links")
+			.setDesc("True enables counting the text of a whole link, while False only counts the link's visible text.")
+			.addToggle(
+				text => text
+				.setValue(this.plugin.settings.countSettings.countFullLink)
+				.onChange(async (val) => {
+					this.plugin.settings.countSettings.countFullLink = val;
 					await this.plugin.saveSettings();
 				})
 			)
