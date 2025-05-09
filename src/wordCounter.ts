@@ -1,3 +1,13 @@
+export function getWordCount(content: string): number {
+    content.replace("_", " ");
+    content = replaceAliasedLinks(content);
+    content = replaceComments(content);
+
+    const matching = [...content.replace(/_/g, " ").matchAll(SPLIT_REGEX)]
+    const count = matching.length
+
+    return count;
+}
 
 function replaceAliasedLinks(contents: string): string {
     const LINK_REGEX = /\[\[.*?\|(.*)\]\]/

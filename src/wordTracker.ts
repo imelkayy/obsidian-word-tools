@@ -19,10 +19,6 @@ export type WordTrackerHistory = {
 	[key: string]: WordTrackerDay
 }
 
-export function wordCount(content: string): number {
-    return content.split(SPLIT_REGEX).filter( w => w ).length;
-}
-
 export function totalWordsForDay(day: WordTrackerDay): number {
     if(!day.files)
         return 0;
