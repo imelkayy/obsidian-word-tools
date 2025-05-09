@@ -1,4 +1,7 @@
 const SPLIT_REGEX = /(?<!-)\b\w+('\w+)?\b|\b\d+(,\d+)*\b/g 
+const COMMENT_REGEX = /\%\%.*\%\%/g
+const LINK_REGEX = /\[\[.*?\|(.*)\]\]/
+
 export function getWordCount(content: string): number {
     content.replace("_", " ");
     content = replaceAliasedLinks(content);
@@ -10,9 +13,7 @@ export function getWordCount(content: string): number {
     return count;
 }
 
-function replaceAliasedLinks(contents: string): string {
-    const LINK_REGEX = /\[\[.*?\|(.*)\]\]/
-   
+function replaceAliasedLinks(contents: string): string {   
     let match;
     while((match = LINK_REGEX.exec(contents)) != null) {
         // Replace all occurances of the aliased link with its alias
@@ -23,6 +24,5 @@ function replaceAliasedLinks(contents: string): string {
 }
 
 function replaceComments(contents: string): string {
-    const COMMENT_REGEX = /\%\%.*\%\%/g
     return contents.replace(COMMENT_REGEX, "");
 }
