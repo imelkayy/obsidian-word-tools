@@ -1,8 +1,8 @@
 import { App, debounce, Debouncer, Modal, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 import { WordTrackerHistory, totalWordsToday, stripWordHistory } from './wordTracker';
-import getWordCount from './wordCounter';
 import { today } from './today';
 import { CountSettings } from './types';
+import getWordAndCharCounts from './wordCounter';
 
 interface WordToolSettings {
 	[key: string]: any,
@@ -11,6 +11,7 @@ interface WordToolSettings {
 	displayUpdateDelay: number,
 	saveDelay: number,
 	history: WordTrackerHistory,
+	countSettings: CountSettings
 }
 
 const DEFAULT_SETTINGS: WordToolSettings = {
@@ -111,13 +112,13 @@ export default class WordToolsPlugin extends Plugin {
 
 	onQuickPreview(file: TFile, contents: string) {
 		const PATH = file.path;
-		const COUNT = getWordCount(contents, this.settings.countSettings);
+		const COUNTS = getWordAndCharCounts(contents, this.settings.countSettings);
 		const TODAY = today();
 
-		this.initFileHistory(PATH, COUNT, TODAY);
+		this.initFileHistory(PATH, COUNTS.wc, TODAY);
 		if(!this.settings.history[TODAY].files)
 			return;
-		this.settings.history[TODAY].files[PATH].currentCount = COUNT;
+		this.settings.history[TODAY].files[PATH].currentCount = COUNTS.wc;
 
 		const TOTAL = totalWordsToday(this.settings.history);
 		this.settings.history[TODAY].total = TOTAL;
@@ -143,13 +144,14 @@ export default class WordToolsPlugin extends Plugin {
 			return;
 		const PATH = file.path;
 		const TODAY = today();
-		const DOC_COUNT = getWordCount(READ, this.settings.countSettings);
-		this.updateCurrentDocCounts(DOC_COUNT, DOC_CHARS)
+		const READ = await this.app.vault.cachedRead(file);
+		const DOC_COUNTS = getWordAndCharCounts(READ, this.settings.countSettings);
+
 		if(!this.settings.history[TODAY].files)
 			return;
 
 		if(!this.settings.history[TODAY].files.hasOwnProperty(PATH)) {
-			this.initFileHistory(PATH, DOC_COUNT, TODAY);
+			this.initFileHistory(PATH, DOC_COUNTS.wc, TODAY);
 		}
 	}
 
