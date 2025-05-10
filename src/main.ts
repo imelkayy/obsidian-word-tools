@@ -133,8 +133,8 @@ export default class WordToolsPlugin extends Plugin {
 
 		if(!this.settings.history[TODAY].files)
 			this.settings.history[TODAY].files = {};
-		if(!this.settings.history[TODAY].files.hasOwnProperty(filePath)) {
-			this.settings.history[TODAY].files[filePath] = { initialCount: wordCount, currentCount: wordCount };
+		if(!this.settings.history[TODAY].files!.hasOwnProperty(filePath)) {
+			this.settings.history[TODAY].files![filePath] = { initialCount: wordCount, currentCount: wordCount };
 			this.debouncedSave();
 		}
 		this.settings.history[TODAY].goal = this.settings.dailyWordGoal;
@@ -206,7 +206,7 @@ export default class WordToolsPlugin extends Plugin {
 		this.initFileHistory(PATH, COUNTS.wc, TODAY);
 		if(!this.settings.history[TODAY].files)
 			return;
-		this.settings.history[TODAY].files[PATH].currentCount = COUNTS.wc;
+		this.settings.history[TODAY].files![PATH].currentCount = COUNTS.wc;
 
 		const TOTAL = totalWordsToday(this.settings.history);
 		this.settings.history[TODAY].total = TOTAL;
@@ -220,11 +220,11 @@ export default class WordToolsPlugin extends Plugin {
 
 		if(!this.settings.history[TODAY].files)
 			return;
-		if(this.settings.history[TODAY].files.hasOwnProperty(oldPath)) {
+		if(this.settings.history[TODAY].files!.hasOwnProperty(oldPath)) {
 			const NEW_PATH = file.path;
 			console.log(`${this.PREFIX}: Handling rename of ${oldPath} to ${NEW_PATH}`);
-			this.settings.history[TODAY].files[NEW_PATH] = this.settings.history[TODAY].files[oldPath];
-			delete this.settings.history[TODAY].files[oldPath];
+			this.settings.history[TODAY].files![NEW_PATH] = this.settings.history[TODAY].files![oldPath];
+			delete this.settings.history[TODAY].files![oldPath];
 		}
 	}
 
@@ -241,7 +241,7 @@ export default class WordToolsPlugin extends Plugin {
 		if(!this.settings.history[TODAY].files)
 			return;
 
-		if(!this.settings.history[TODAY].files.hasOwnProperty(PATH)) {
+		if(!this.settings.history[TODAY].files!.hasOwnProperty(PATH)) {
 			this.initFileHistory(PATH, DOC_COUNTS.wc, TODAY);
 		}
 	}
