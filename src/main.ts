@@ -48,6 +48,7 @@ export default class WordToolsPlugin extends Plugin {
 			cc: number
 		}
 	} = {};
+	hasSel: boolean;
 
 	PREFIX = "Word Tools";
 
@@ -141,11 +142,18 @@ export default class WordToolsPlugin extends Plugin {
 		this.settings.history[TODAY].goal = this.settings.dailyWordGoal;
 	}
 
-	updateCurrentDocCounts(words?: number, chars?: number) {
-		const sel= this.app.workspace.activeEditor?.editor?.getSelection();
+	async updateCurrentDocCounts(words?: number, chars?: number) {
+		const sel = this.app.workspace.activeEditor?.editor?.getSelection();
 
 		if(sel) {
+			this.hasSel = true;
 			const count = getWordAndCharCounts(sel, this.settings.countSettings);
+			words = count.wc;
+			chars = count.cc;
+		} else if (this.hasSel && !words && !chars && this.app.workspace.activeEditor?.file) {
+			this.hasSel = false;
+			const read = await this.app.vault.cachedRead(this.app.workspace.activeEditor?.file!);
+			const count = getWordAndCharCounts(read, this.settings.countSettings);
 			words = count.wc;
 			chars = count.cc;
 		}
