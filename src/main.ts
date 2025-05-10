@@ -77,6 +77,29 @@ export default class WordToolsPlugin extends Plugin {
 		this.registerEvent(this.app.workspace.on("quick-preview", this.onQuickPreview.bind(this)));
 		this.registerEvent(this.app.vault.on("rename", this.onFileRenamed.bind(this)))
 		this.registerEvent(this.app.workspace.on("file-open", this.onFileOpen.bind(this)));
+
+		// On layout ready
+		this.app.workspace.onLayoutReady(() => {
+			this.app.workspace.iterateAllLeaves((leaf) => {
+				// Find the file explorer leaf
+				if(leaf.getViewState().type == "file-explorer") {
+					try {
+						const view = (leaf as WorkspaceLeaf).view as any
+						const container = view.containerEl as HTMLElement
+						// Create outer element
+						const outer = container.createDiv({ cls: "tree-item nav-folder word-tools-global-counts" });
+						container.insertAfter(outer, container.firstChild);
+
+						this.globalWordCountEl = outer.createEl("div", { text: "0 words", cls: "world-tools-no-pad nav-file-title" })
+						
+						this.updateGlobalWordCount();
+					} catch (e) {
+						console.log(e)
+					}
+				}
+			});
+		})
+		
 	}
 
 	onunload() {
