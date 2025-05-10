@@ -19,7 +19,7 @@ export type WordTrackerHistory = {
 
 export function totalWordsForDay(day: WordTrackerDay): number {
     if(!day.files)
-        return 0;
+        return day.total ?? 0;
     
     const FILES = Object.keys(day.files);
     let count = 0;
