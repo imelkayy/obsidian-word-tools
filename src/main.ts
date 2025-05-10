@@ -9,6 +9,8 @@ interface WordToolSettings {
 	dailyWordGoal: number,
 	showGoal: boolean,
 	displayUpdateDelay: number,
+	globalUpdateDelay: number,
+	globalUpdateInterval: number,
 	saveDelay: number,
 	history: WordTrackerHistory,
 	countSettings: CountSettings
@@ -18,6 +20,8 @@ const DEFAULT_SETTINGS: WordToolSettings = {
 	dailyWordGoal: 500,
 	showGoal: true,
 	displayUpdateDelay: 250,
+	globalUpdateDelay: 1000,
+	globalUpdateInterval: 5000,
 	saveDelay: 1000,
 	history: {},
 	countSettings: {
@@ -31,9 +35,18 @@ export default class WordToolsPlugin extends Plugin {
 	dailyCountBarEl: HTMLElement;
 	docCurrentWordsBarEl: HTMLElement;
 	docCurrentCharsBarEl: HTMLElement;
+	globalWordCountEl: HTMLElement;
 	todayCount: number;
 	updateCount: Debouncer<[count: number], void>;
 	debouncedSave: Debouncer<[], void>;
+	debouncedGlobalUpdate: Debouncer<[], void>;
+	globalCountCache: {
+		[filepath: string]: {
+			cacheTime: number,
+			wc: number,
+			cc: number
+		}
+	} = {};
 
 	PREFIX = "Word Tools";
 
