@@ -1,4 +1,4 @@
-import { App, debounce, Debouncer, Modal, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { App, debounce, Debouncer, WorkspaceLeaf, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 import { WordTrackerHistory, totalWordsToday, stripWordHistory } from './wordTracker';
 import { today } from './today';
 import { CountSettings } from './types';
@@ -55,7 +55,6 @@ export default class WordToolsPlugin extends Plugin {
 		this.docCurrentWordsBarEl = this.addStatusBarItem();
 		this.docCurrentCharsBarEl = this.addStatusBarItem();
 		this.dailyCountBarEl = this.addStatusBarItem();
-		
 
 		await this.loadSettings();
 
@@ -63,6 +62,10 @@ export default class WordToolsPlugin extends Plugin {
 		this.updateCount = debounce(this.handleCountUpdate, this.settings.displayUpdateDelay, false);
 		this.debouncedSave = debounce(this.handleDebouncedSave, this.settings.saveDelay, true);
 		this.debouncedGlobalUpdate = debounce(this.updateGlobalWordCount, this.settings.globalUpdateDelay, false);
+
+		this.registerInterval(
+			window.setInterval(() => this.updateCurrentDocCounts(), 250)
+		)
 
 		// Initialize today's word count if it doesn't exist
 		this.initDay(today());
@@ -137,9 +140,19 @@ export default class WordToolsPlugin extends Plugin {
 		this.settings.history[TODAY].goal = this.settings.dailyWordGoal;
 	}
 
-	updateCurrentDocCounts(words: number, chars: number) {
-		this.docCurrentWordsBarEl.setText(`${words.toLocaleString()} words`)
-		this.docCurrentCharsBarEl.setText(`${chars.toLocaleString()} characters`);
+	updateCurrentDocCounts(words?: number, chars?: number) {
+		const sel= this.app.workspace.activeEditor?.editor?.getSelection();
+
+		if(sel) {
+			const count = getWordAndCharCounts(sel, this.settings.countSettings);
+			words = count.wc;
+			chars = count.cc;
+		}
+
+		if(words)
+			this.docCurrentWordsBarEl.setText(`${words.toLocaleString()} words`)
+		if(chars)
+			this.docCurrentCharsBarEl.setText(`${chars.toLocaleString()} characters`);
 	}
 
 	updateStatusBarCount() {
