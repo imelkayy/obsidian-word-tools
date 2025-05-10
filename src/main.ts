@@ -156,6 +156,23 @@ export default class WordToolsPlugin extends Plugin {
 		}
 	}
 
+	async updateGlobalWordCount() {
+		if(this.globalWordCountEl) {
+			let words = 0;
+			const files = this.app.vault.getFiles();
+			for(let i = 0; i < files.length; i++) {
+				const file = files[i];
+				
+				if(!this.globalCountCache.hasOwnProperty(file.path) || file.stat.mtime > this.globalCountCache[file.path].cacheTime)
+					await this.updateGlobalCountCacheForFile(file);
+
+				words += this.globalCountCache[file.path].wc;
+			}
+
+			this.globalWordCountEl.setText(`${words.toLocaleString()} words`)
+		}
+	}
+
 	handleCountUpdate(count: number) {
 		this.todayCount = count;
 
