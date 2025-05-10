@@ -187,7 +187,7 @@ export default class WordToolsPlugin extends Plugin {
 		const PATH = file.path;
 		const COUNTS = getWordAndCharCounts(contents, this.settings.countSettings);
 		const TODAY = today();
-
+		
 		this.updateCurrentDocCounts(COUNTS.wc, COUNTS.cc)
 
 		this.initFileHistory(PATH, COUNTS.wc, TODAY);
@@ -199,6 +199,7 @@ export default class WordToolsPlugin extends Plugin {
 		this.settings.history[TODAY].total = TOTAL;
 
 		this.updateCount(TOTAL);
+		this.debouncedGlobalUpdate();
 	}
 
 	onFileRenamed(file: TFile, oldPath: string) {
