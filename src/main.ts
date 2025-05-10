@@ -147,6 +147,15 @@ export default class WordToolsPlugin extends Plugin {
 		this.dailyCountBarEl.setText(text);
 	}
 
+	async updateGlobalCountCacheForFile(file: TFile) {
+		const count = getWordAndCharCounts(await this.app.vault.cachedRead(file), this.settings.countSettings);
+		this.globalCountCache[file.path] = {
+			cacheTime: (new Date()).getMilliseconds(),
+			wc: count.wc,
+			cc: count.cc
+		}
+	}
+
 	handleCountUpdate(count: number) {
 		this.todayCount = count;
 
