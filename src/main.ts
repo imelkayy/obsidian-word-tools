@@ -26,7 +26,8 @@ const DEFAULT_SETTINGS: WordToolSettings = {
 	history: {},
 	countSettings: {
 		countComments: false,
-		countFullLink: false
+		countFullLink: false,
+		removeFrontmatter: true
 	}
 }
 
@@ -352,6 +353,18 @@ class WordToolsSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.countSettings.countFullLink)
 				.onChange(async (val) => {
 					this.plugin.settings.countSettings.countFullLink = val;
+					await this.plugin.saveSettings();
+				})
+			)
+
+		new Setting(containerEl)
+			.setName("Remove Frontmatter")
+			.setDesc("If true, remove frontmatter from the word and character count.")
+			.addToggle(
+				text => text
+				.setValue(this.plugin.settings.countSettings.removeFrontmatter)
+				.onChange(async (val) => {
+					this.plugin.settings.countSettings.removeFrontmatter = val;
 					await this.plugin.saveSettings();
 				})
 			)
