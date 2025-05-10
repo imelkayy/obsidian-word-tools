@@ -54,8 +54,5 @@ function removeFrontmatter(contents: string): string {
     const info = getFrontMatterInfo(contents);
     const start = info.contentStart;
 
-    console.log(info)
-    console.log(start)
-
     return contents.substring(start);
 }
