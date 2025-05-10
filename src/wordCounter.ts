@@ -1,3 +1,4 @@
+import { getFrontMatterInfo } from "obsidian";
 import { CountSettings } from "./types";
 
 const SPLIT_REGEX = /(?<!-)\b\w+('\w+)?\b|\b\d+(,\d+)*\b/g 
@@ -25,6 +26,8 @@ export function getCharacterCount(content: string): number {
 }
 
 function parseContentBySettings(content: string, settings: CountSettings): string {
+    if(settings.removeFrontmatter)
+        content = removeFrontmatter(content);
     if(!settings.countComments)
         content = replaceComments(content);
     if(!settings.countFullLink)
@@ -45,4 +48,14 @@ function replaceAliasedLinks(contents: string): string {
 
 function replaceComments(contents: string): string {
     return contents.replace(COMMENT_REGEX, "");
+}
+
+function removeFrontmatter(contents: string): string {
+    const info = getFrontMatterInfo(contents);
+    const start = info.contentStart;
+
+    console.log(info)
+    console.log(start)
+
+    return contents.substring(start);
 }
