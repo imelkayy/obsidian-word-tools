@@ -62,6 +62,7 @@ export default class WordToolsPlugin extends Plugin {
 		// Create debouncers for updating.
 		this.updateCount = debounce(this.handleCountUpdate, this.settings.displayUpdateDelay, false);
 		this.debouncedSave = debounce(this.handleDebouncedSave, this.settings.saveDelay, true);
+		this.debouncedGlobalUpdate = debounce(this.updateGlobalWordCount, this.settings.globalUpdateDelay, false);
 
 		// Initialize today's word count if it doesn't exist
 		this.initDay(today());
