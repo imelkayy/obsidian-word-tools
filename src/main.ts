@@ -151,6 +151,7 @@ export default class WordToolsPlugin extends Plugin {
 
 		this.dailyCount.updateTodayCount(TOTAL);
 		this.docCount.updateCurrentDocCounts();
+		this.debouncedSave();
 	}
 
 	onFileRenamed(file: TFile, oldPath: string) {
@@ -163,6 +164,7 @@ export default class WordToolsPlugin extends Plugin {
 			console.log(`${this.PREFIX}: Handling rename of ${oldPath} to ${NEW_PATH}`);
 			this.settings.history[TODAY].files![NEW_PATH] = this.settings.history[TODAY].files![oldPath];
 			delete this.settings.history[TODAY].files![oldPath];
+			this.debouncedSave();
 		}
 	}
 
@@ -182,6 +184,7 @@ export default class WordToolsPlugin extends Plugin {
 		if(!this.settings.history[TODAY].files!.hasOwnProperty(PATH)) {
 			this.initFileHistory(PATH, DOC_COUNTS.wc, TODAY);
 		}
+		this.debouncedSave();
 	}
 
 	async handleDebouncedSave() {
