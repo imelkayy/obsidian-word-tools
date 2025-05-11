@@ -1,28 +1,19 @@
-import { debounce, Debouncer, WorkspaceLeaf, Plugin, TFile } from 'obsidian';
+import { debounce, Debouncer, Plugin, TFile } from 'obsidian';
 import { totalWordsToday, stripWordHistory } from './lib/wordTracker';
 import { today } from './lib/today';
 import getWordAndCharCounts from './lib/wordCounter';
 import { DEFAULT_SETTINGS, WordToolSettings, WordToolsSettingTab } from './settings';
 import { WordCountHelper } from './docCountHelper';
 import { DailyCountHelper } from './dailyCountHelper';
+import { GlobalCountHelper } from './globalCountHelper';
 
 export default class WordToolsPlugin extends Plugin {
 	settings: WordToolSettings;
-	globalWordCountEl: HTMLElement;
-	todayCount: number;
-
 	debouncedSave: Debouncer<[], void>;
-
-	globalCountCache: {
-		[filepath: string]: {
-			cacheTime: number,
-			wc: number,
-			cc: number
-		}
-	} = {};
 
 	docCount: WordCountHelper;
 	dailyCount: DailyCountHelper;
+	globalCount: GlobalCountHelper;
 
 	PREFIX = "Word Tools";
 
@@ -51,24 +42,7 @@ export default class WordToolsPlugin extends Plugin {
 
 		// On layout ready
 		this.app.workspace.onLayoutReady(() => {
-			this.app.workspace.iterateAllLeaves((leaf) => {
-				// Find the file explorer leaf
-				if(leaf.getViewState().type == "file-explorer") {
-					try {
-						const view = (leaf as WorkspaceLeaf).view as any
-						const container = view.containerEl as HTMLElement
-						// Create outer element
-						const outer = container.createDiv({ cls: "tree-item nav-folder word-tools-global-counts" });
-						container.insertAfter(outer, container.firstChild);
-
-						this.globalWordCountEl = outer.createEl("div", { text: "0 words", cls: "world-tools-no-pad nav-file-title" })
-						
-						this.updateGlobalWordCount();
-					} catch (e) {
-						console.log(e)
-					}
-				}
-			});
+			this.globalCount = new GlobalCountHelper(this);
 		})
 		
 	}
@@ -108,32 +82,6 @@ export default class WordToolsPlugin extends Plugin {
 		this.settings.history[TODAY].goal = this.settings.dailyWordGoal;
 	}
 
-	async updateGlobalCountCacheForFile(file: TFile) {
-		const count = getWordAndCharCounts(await this.app.vault.cachedRead(file), this.settings.countSettings);
-		this.globalCountCache[file.path] = {
-			cacheTime: (new Date()).getMilliseconds(),
-			wc: count.wc,
-			cc: count.cc
-		}
-	}
-
-	async updateGlobalWordCount() {
-		if(this.globalWordCountEl) {
-			let words = 0;
-			const files = this.app.vault.getFiles();
-			for(let i = 0; i < files.length; i++) {
-				const file = files[i];
-				
-				if(!this.globalCountCache.hasOwnProperty(file.path) || file.stat.mtime > this.globalCountCache[file.path].cacheTime)
-					await this.updateGlobalCountCacheForFile(file);
-
-				words += this.globalCountCache[file.path].wc;
-			}
-
-			this.globalWordCountEl.setText(`${words.toLocaleString()} words`)
-		}
-	}
-
 	onQuickPreview(file: TFile, contents: string) {
 		const PATH = file.path;
 		const COUNTS = getWordAndCharCounts(contents, this.settings.countSettings);
@@ -151,6 +99,7 @@ export default class WordToolsPlugin extends Plugin {
 
 		this.dailyCount.updateTodayCount(TOTAL);
 		this.docCount.updateCurrentDocCounts();
+		this.globalCount.updateGlobalWordCount();
 		this.debouncedSave();
 	}
 
