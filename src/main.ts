@@ -1,7 +1,7 @@
 import { debounce, Debouncer, WorkspaceLeaf, Plugin, TFile } from 'obsidian';
-import { totalWordsToday, stripWordHistory } from './wordTracker';
-import { today } from './today';
-import getWordAndCharCounts from './wordCounter';
+import { totalWordsToday, stripWordHistory } from './lib/wordTracker';
+import { today } from './lib/today';
+import getWordAndCharCounts from './lib/wordCounter';
 import { DEFAULT_SETTINGS, WordToolSettings, WordToolsSettingTab } from './settings';
 
 export default class WordToolsPlugin extends Plugin {

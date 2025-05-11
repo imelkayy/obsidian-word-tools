@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import { CountSettings } from "./types"
-import { WordTrackerHistory } from "./wordTracker"
+import { CountSettings } from "./lib/types"
+import { WordTrackerHistory } from "./lib/wordTracker"
 import WordToolsPlugin from "./main";
 
 export interface WordToolSettings {
