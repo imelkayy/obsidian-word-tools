@@ -13,6 +13,9 @@ export interface WordToolSettings {
     saveDelay: number,
     history: WordTrackerHistory,
     countSettings: CountSettings
+	enableFileCount: boolean,
+	enableDailyCount: boolean,
+	enableGlobalCount: boolean
 }
 
 export const DEFAULT_SETTINGS: WordToolSettings = {
@@ -27,7 +30,10 @@ export const DEFAULT_SETTINGS: WordToolSettings = {
         countComments: false,
         countFullLink: false,
         removeFrontmatter: true
-    }
+    },
+	enableFileCount: true,
+	enableDailyCount: true,
+	enableGlobalCount: true
 }
 
 export class WordToolsSettingTab extends PluginSettingTab {
@@ -42,6 +48,43 @@ export class WordToolsSettingTab extends PluginSettingTab {
 		const {containerEl} = this;
 
 		containerEl.empty();
+			
+		new Setting(containerEl)
+			.setName("Enable Daily Word Count")
+			.setDesc("Enables the daily word counting system.")
+			.addToggle(
+				text => text
+				.setValue(this.plugin.settings.enableDailyCount)
+				.onChange(async (val) => {
+					this.plugin.settings.enableDailyCount = val;
+					await this.plugin.saveSettings();
+				})
+			)
+
+		new Setting(containerEl)
+			.setName("Enable Document Word Count")
+			.setDesc("Enables the custom document word and character counter. Disabling the core word count plugin while this is active is recommended.")
+			.addToggle(
+				text => text
+				.setValue(this.plugin.settings.enableFileCount)
+				.onChange(async (val) => {
+					this.plugin.settings.enableFileCount = val;
+					await this.plugin.saveSettings();
+				})
+			)
+		
+		new Setting(containerEl)
+			.setName("Enable Global Word Count")
+			.setDesc("Enables the global word counting system.")
+			.addToggle(
+				text => text
+				.setValue(this.plugin.settings.enableGlobalCount)
+				.onChange(async (val) => {
+					this.plugin.settings.enableGlobalCount = val;
+					await this.plugin.saveSettings();
+				})
+			)
+
 
 		// Show Daily Goal
 		new Setting(containerEl)
@@ -144,5 +187,6 @@ export class WordToolsSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
+		
 	}
 }
