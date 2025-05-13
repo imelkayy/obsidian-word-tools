@@ -2,6 +2,9 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import { CountSettings } from "./lib/types"
 import { WordTrackerHistory } from "./lib/wordTracker"
 import WordToolsPlugin from "./main";
+import { BoolSetting } from "./lib/settings/boolSetting";
+import { SettingDivider } from "./lib/settings/settingDivider";
+import { NumberSetting } from "./lib/settings/numberSetting";
 
 export interface WordToolSettings {
     [key: string]: any,
@@ -48,145 +51,92 @@ export class WordToolsSettingTab extends PluginSettingTab {
 		const {containerEl} = this;
 
 		containerEl.empty();
-			
-		new Setting(containerEl)
-			.setName("Enable Daily Word Count")
-			.setDesc("Enables the daily word counting system.")
-			.addToggle(
-				text => text
-				.setValue(this.plugin.settings.enableDailyCount)
-				.onChange(async (val) => {
-					this.plugin.settings.enableDailyCount = val;
-					await this.plugin.saveSettings();
-				})
-			)
 
-		new Setting(containerEl)
-			.setName("Enable Document Word Count")
-			.setDesc("Enables the custom document word and character counter. Disabling the core word count plugin while this is active is recommended.")
-			.addToggle(
-				text => text
-				.setValue(this.plugin.settings.enableFileCount)
-				.onChange(async (val) => {
-					this.plugin.settings.enableFileCount = val;
-					await this.plugin.saveSettings();
-				})
-			)
+
+		/*
+		 * Daily Word Counter Settings
+		 */
+
+		new SettingDivider(containerEl, "Daily Word Counter");
+		new BoolSetting("Enable Daily Count", "Enables the daily word counting system", containerEl, "enableDailyCount", this.plugin);
+		new BoolSetting("Show Daily Goal", "Show the daily word goal next to the current day's count", containerEl, "showGoal", this.plugin);
+		new NumberSetting("Daily Word Goal", "Your daily word goal", containerEl, "dailyWordGoal", this.plugin);
 		
-		new Setting(containerEl)
-			.setName("Enable Global Word Count")
-			.setDesc("Enables the global word counting system.")
-			.addToggle(
-				text => text
-				.setValue(this.plugin.settings.enableGlobalCount)
-				.onChange(async (val) => {
-					this.plugin.settings.enableGlobalCount = val;
-					await this.plugin.saveSettings();
-				})
-			)
+		/*
+		 * Document Word Counter Settings
+		 */
 
+		new SettingDivider(containerEl, "Document Word Counter");
+		new BoolSetting(
+			"Enable Document Word Count",
+			"Enables the custom document word and character counter. Disabling the core word count plugin while this is active is recommended.",
+			containerEl,
+			"enableFileCount",
+			this.plugin
+		);
 
-		// Show Daily Goal
-		new Setting(containerEl)
-			.setName("Show Daily Goal")
-			.setDesc("Show the daily word goal next to the current day's count")
-			.addToggle(
-				text => text
-				.setValue(this.plugin.settings.showGoal)
-				.onChange(async (val) => {
-					this.plugin.settings.showGoal = val;
-					await this.plugin.saveSettings();
-				})
-			)
+		/*
+		 * Global Word Counter Settings
+		 */
+
+		new SettingDivider(containerEl, "Global Word Counter");
+		new BoolSetting(
+			"Enable Global Word Count",
+			"Enables the global word counting system.",
+			containerEl,
+			"enableGlobalCount",
+			this.plugin
+		);
 		
-		new Setting(containerEl)
-			.setName("Daily Word Goal")
-			.setDesc("Your daily word goal")
-			.addText(
-				text => text
-				.setValue(String(this.plugin.settings.dailyWordGoal))
-				.onChange(async (val) => {
-					const num = Number(val)
-					if(num >= 0) {
-						// Actual number given
-						this.plugin.settings.dailyWordGoal = num;
-						await this.plugin.saveSettings();
-					} else if(val === "") {
-						// Implicitly 0 if string is empty
-						this.plugin.settings.dailyWordGoal = 0;
-						await this.plugin.saveSettings();
-					} else {
-						// NaN given, reset to last stored value
-						text.setValue(String(this.plugin.settings.dailyWordGoal));
-					}
-				})
-			)
+		/*
+		 * Saving Settings
+		 */
 
-		// Save Delay
-		new Setting(containerEl)
-			.setName("Save Delay")
-			.setDesc("The delay, in milliseconds, between a file being written to and the word count being saved.")
-			.setHeading()
-			.addSlider(
-				text => text
-				.setLimits(50, 5000, 50)
-				.setValue(this.plugin.settings.saveDelay)
-				.onChange(async (val) => {
-					this.plugin.settings.saveDelay = val;
-					await this.plugin.saveSettings();
-				})
-			)
+		new SettingDivider(containerEl, "Saving");
+		new NumberSetting(
+			"Save Delay",
+			"The delay, in milliseconds, between changes and the word count being saved.",
+			containerEl,
+			"saveDelay",
+			this.plugin
+		);
+		new NumberSetting(
+			"Display Update Delay",
+			"The delay, in milliseconds, between a file being written to and the word count visually updating.",
+			containerEl,
+			"displayUpdateDelay",
+			this.plugin
+		);
 		
-		// Display Update Delay
-		new Setting(containerEl)
-			.setName("Display Update Delay")
-			.setDesc("The delay, in milliseconds, between a file being written to and the word count visually updating.")
-			.setHeading()
-			.addSlider(
-				text => text
-				.setLimits(50, 5000, 50)
-				.setValue(this.plugin.settings.displayUpdateDelay)
-				.onChange(async (val) => {
-					this.plugin.settings.displayUpdateDelay = val;
-					await this.plugin.saveSettings();
-				})
-			)
-
-		new Setting(containerEl)
-			.setName("Count Comments")
-			.setDesc("Count text inside comments towards a document's word count.")
-			.addToggle(
-				text => text
-				.setValue(this.plugin.settings.countSettings.countComments)
-				.onChange(async (val) => {
-					this.plugin.settings.countSettings.countComments = val;
-					await this.plugin.saveSettings();
-				})
-			)
-
-		new Setting(containerEl)
-			.setName("Count Whole Links")
-			.setDesc("True enables counting the text of a whole link, while False only counts the link's visible text.")
-			.addToggle(
-				text => text
-				.setValue(this.plugin.settings.countSettings.countFullLink)
-				.onChange(async (val) => {
-					this.plugin.settings.countSettings.countFullLink = val;
-					await this.plugin.saveSettings();
-				})
-			)
-
-		new Setting(containerEl)
-			.setName("Remove Frontmatter")
-			.setDesc("If true, remove frontmatter from the word and character count.")
-			.addToggle(
-				text => text
-				.setValue(this.plugin.settings.countSettings.removeFrontmatter)
-				.onChange(async (val) => {
-					this.plugin.settings.countSettings.removeFrontmatter = val;
-					await this.plugin.saveSettings();
-				})
-			)
+		/*
+		 * Generic Counting
+		 */
+		
+		new SettingDivider(containerEl, "All Counters");
+		new BoolSetting(
+			"Count Comments",
+			"Count text inside comments towards a document's word count.",
+			containerEl,
+			"countComments",
+			this.plugin,
+			this.plugin.settings.countSettings
+		);
+		new BoolSetting(
+			"Count Whole Links",
+			"True enables counting the text of a whole link, while False only counts the link's visible text.",
+			containerEl,
+			"countFullLinks",
+			this.plugin,
+			this.plugin.settings.countSettings
+		);
+		new BoolSetting(
+			"Remove Frontmatter",
+			"If true, remove frontmatter from the word and character count.",
+			containerEl,
+			"removeFrontmatter",
+			this.plugin,
+			this.plugin.settings.countSettings
+		)
 		
 	}
 }
